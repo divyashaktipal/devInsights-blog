@@ -1,12 +1,23 @@
-let db;
 import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+let db;
 
 async function connectToDb(cb) {
-  const client = new MongoClient("mongodb://127.0.0.1:27017");
-  await client.connect();
+  try {
+    const client = new MongoClient(process.env.MONGO_URI);
 
-  db = client.db("react-blog-db");
-  cb();
+    await client.connect();
+
+    db = client.db();
+    console.log(" Connected to MongoDB");
+
+    cb();
+  } catch (err) {
+    console.error("MongoDB connection failed:", err);
+  }
 }
 
 export { db, connectToDb };

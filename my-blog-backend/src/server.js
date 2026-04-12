@@ -1,6 +1,7 @@
 import fs from "fs";
 import admin from "firebase-admin";
 import express from "express";
+import cors from "cors";
 import { db, connectToDb } from "./db.js";
 
 const credentials = JSON.parse(fs.readFileSync("./credentials.json"));
@@ -11,6 +12,20 @@ admin.initializeApp({
 });
 
 const app = express();
+app.use(cors());
+
+const corsOptions = {
+  origin: [
+    "https://devInsights.vercel.app/",
+    "https://devInsights.divyashakti.eu.cc",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000"
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+};
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 // Middleware to check auth token
@@ -28,6 +43,11 @@ app.use(async (req, res, next) => {
   }
   req.user = req.user || {};
   next();
+});
+
+// Test API endpoint
+app.get("/api", (req, res) => {
+  res.json({ message: "API is working 🚀" });
 });
 
 // Get article info
@@ -106,7 +126,7 @@ app.post("/api/articles/:name/comments", async (req, res) => {
 
 // Start the server after connecting to the database
 connectToDb(() => {
-  console.log("successfully connected to the database:");
+  console.log("DB connected, starting server...");
   app.listen(8000, () => {
     console.log("Server is listening on port 8000");
   });
